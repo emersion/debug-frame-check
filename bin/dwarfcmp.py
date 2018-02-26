@@ -76,7 +76,10 @@ pcs = sorted(pcs)
 mismatched = False
 for pc in pcs:
     ref_line = {}
-    for dwarf_table in dwarf_tables:
+    ref_filenames = {}
+    for i, dwarf_table in enumerate(dwarf_tables):
+        filename = filenames[i]
+
         line = None
         while len(dwarf_table) > 0:
             line = dwarf_table[0]
@@ -94,12 +97,15 @@ for pc in pcs:
 
         if 'cfa' not in ref_line:
             ref_line['cfa'] = line['cfa']
+            ref_filenames['cfa'] = filename
         else:
             if not compare_CFI_CFA_rule(ref_line['cfa'], line['cfa']):
-                print("CFA rule mismatch at pc=0x%x: %s vs %s" % (
+                print("CFA rule mismatch at pc=0x%x: %s (in %s) vs %s (in %s)" % (
                     pc,
                     describe_CFI_CFA_rule(ref_line['cfa']),
+                    ref_filenames['cfa'],
                     describe_CFI_CFA_rule(line['cfa']),
+                    filename,
                 ))
                 mismatched = True
 
@@ -107,12 +113,15 @@ for pc in pcs:
             reg_rule = line.get(reg_num, RegisterRule(RegisterRule.UNDEFINED))
             if reg_num not in ref_line:
                 ref_line[reg_num] = reg_rule
+                ref_filenames[reg_num] = filename
             else:
                 if not compare_CFI_register_rule(ref_line[reg_num], reg_rule):
-                    print("Register rule mismatch at pc=0x%x: %s vs %s" % (
+                    print("Register rule mismatch at pc=0x%x: %s (in %s) vs %s (in %s)" % (
                         pc,
                         describe_CFI_register_rule(ref_line[reg_num]),
+                        ref_filenames[reg_num],
                         describe_CFI_register_rule(reg_rule),
+                        filename,
                     ))
                     mismatched = True
 
