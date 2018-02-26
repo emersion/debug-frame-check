@@ -24,16 +24,16 @@ fi
 # Compile the file with DWARF debugging information
 dwarf_exec="$source_file-dwarf"
 dwarf_obj="$dwarf_exec.o"
-$CC -c "$source_file" -o "$dwarf_obj"
-$CC -no-pie "$dwarf_exec.o" -o "$dwarf_exec"
+$CC $CFLAGS -c "$source_file" -o "$dwarf_obj"
+$CC -no-pie $LDFLAGS "$dwarf_exec.o" -o "$dwarf_exec"
 
 # Compile the file with ORC debugging information and convert ORC to DWARF
 orc_exec="$source_file-orc"
 orc_obj="$orc_exec.o"
-$CC -fno-asynchronous-unwind-tables -c "$source_file" -o "$orc_obj"
+$CC -fno-asynchronous-unwind-tables $CFLAGS -c "$source_file" -o "$orc_obj"
 $OBJTOOL orc generate "$orc_obj"
 $DAREOG generate-dwarf "$orc_obj"
-$CC -no-pie "$orc_obj" -o "$orc_exec"
+$CC -no-pie $LDFLAGS "$orc_obj" -o "$orc_exec"
 
 # Compare DWARF tables
 $bin_dir/dwarfcmp.py "$dwarf_exec" "$orc_exec"
