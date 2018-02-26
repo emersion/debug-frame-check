@@ -10,6 +10,7 @@ if [ $# -lt 1 ]; then
 fi
 
 source_file="$1"
+basename=$(basename "$source_file" ".c")
 
 if [ "$CC" == "" ] ; then
 	CC="cc"
@@ -22,13 +23,13 @@ if [ "$DAREOG" == "" ] ; then
 fi
 
 # Compile the file with DWARF debugging information
-dwarf_exec="$source_file-dwarf"
+dwarf_exec="$basename-dwarf"
 dwarf_obj="$dwarf_exec.o"
 $CC $CFLAGS -c "$source_file" -o "$dwarf_obj"
 $CC -no-pie $LDFLAGS "$dwarf_exec.o" -o "$dwarf_exec"
 
 # Compile the file with ORC debugging information and convert ORC to DWARF
-orc_exec="$source_file-orc"
+orc_exec="$basename-orc"
 orc_obj="$orc_exec.o"
 $CC -fno-asynchronous-unwind-tables $CFLAGS -c "$source_file" -o "$orc_obj"
 $OBJTOOL orc generate "$orc_obj"
