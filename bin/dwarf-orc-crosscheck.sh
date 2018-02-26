@@ -12,13 +12,13 @@ fi
 source_file="$1"
 basename=$(basename "$source_file" ".c")
 
-if [ "$CC" == "" ] ; then
+if [ "$CC" = "" ] ; then
 	CC="cc"
 fi
-if [ "$OBJTOOL" == "" ] ; then
+if [ "$OBJTOOL" = "" ] ; then
 	OBJTOOL="objtool"
 fi
-if [ "$DAREOG" == "" ] ; then
+if [ "$DAREOG" = "" ] ; then
 	DAREOG="dareog"
 fi
 
@@ -37,4 +37,4 @@ $DAREOG generate-dwarf "$orc_obj"
 $CC -no-pie $LDFLAGS "$orc_obj" -o "$orc_exec"
 
 # Compare DWARF tables
-$bin_dir/dwarfcmp.py "$dwarf_exec" "$orc_exec"
+"$bin_dir/dwarfcmp.py" "$dwarf_exec" "$orc_exec"
