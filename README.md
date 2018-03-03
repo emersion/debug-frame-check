@@ -10,6 +10,7 @@ Dependencies:
 * [`dareog`](https://github.com/emersion/dareog)
 * [`pyelftools`](https://github.com/eliben/pyelftools)
 * [Csmith](https://embed.cs.utah.edu/csmith/) (optional)
+* [C-Reduce](https://embed.cs.utah.edu/creduce/) (optional)
 
 Usage:
 
