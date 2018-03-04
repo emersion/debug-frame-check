@@ -24,7 +24,7 @@ these tools)
 Csmith example usage:
 
 ```shell
-env CC=gcc CFLAGS="-I/usr/include/csmith-2.3.0/ -w" OBJTOOL=../../linux/tools/objtool/objtool DAREOG=../../dareog/build/dareog bin/dwarf-orc-csmith.sh
+env CC=gcc CFLAGS="-I/usr/include/csmith-2.3.0/ -w -O2" OBJTOOL=../../linux/tools/objtool/objtool OBJTOOLFLAGS="--no-fp" DAREOG=../../dareog/build/dareog bin/dwarf-orc-csmith.sh
 ```
 
 ## License
