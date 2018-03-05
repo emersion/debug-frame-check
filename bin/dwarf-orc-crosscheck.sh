@@ -33,8 +33,8 @@ orc_exec="$basename-orc"
 orc_obj="$orc_exec.o"
 $CC -fno-asynchronous-unwind-tables $CFLAGS -c "$source_file" -o "$orc_obj"
 $OBJTOOL orc generate $OBJTOOLFLAGS "$orc_obj"
-$DAREOG generate-dwarf "$orc_obj"
+$DAREOG generate-dwarf $DAREOGFLAGS "$orc_obj"
 $CC -no-pie $LDFLAGS "$orc_obj" -o "$orc_exec"
 
 # Compare DWARF tables
-"$bin_dir/dwarfcmp.py" "$dwarf_exec" "$orc_exec" || exit 42
+"$bin_dir/dwarfcmp.py" $DWARFCMPFLAGS "$dwarf_exec" "$orc_exec" || exit 42

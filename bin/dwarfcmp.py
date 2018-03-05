@@ -12,16 +12,20 @@ from elftools.dwarf.callframe import FDE, CFARule, RegisterRule
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--strict', help='enable strict mode', action='store_true')
+parser.add_argument('--verbose', help='enable verbose mode', action='store_true')
 parser.add_argument('files', nargs='+')
 
 args = parser.parse_args()
 strict = args.strict
+verbose = args.verbose
 filenames = args.files
 
 def compare_CFI_CFA_rule(a, b):
     if a.expr or b.expr:
         if not (a.expr and b.expr):
             return False
+        if not strict:
+            print("Warning: ignored CFA expression")
         return not strict # TODO
     else:
         return a.reg == b.reg and a.offset == b.offset
@@ -67,7 +71,7 @@ for elf_file in elf_files:
                 line['reg_order'] = decoded_table.reg_order
                 dwarf_table.append(line)
                 pcs.add(line['pc'])
-    sorted(dwarf_table, key=operator.itemgetter('pc'))
+    dwarf_table = sorted(dwarf_table, key=lambda line: line['pc'])
 
     dwarf_tables.append(dwarf_table)
 
@@ -75,6 +79,9 @@ pcs = sorted(pcs)
 
 mismatched = False
 for pc in pcs:
+    if verbose:
+        print("pc=%x" % pc)
+
     ref_line = {}
     ref_filenames = {}
     for i, dwarf_table in enumerate(dwarf_tables):
@@ -95,6 +102,8 @@ for pc in pcs:
         if line is None:
             continue
 
+        if verbose:
+            print("%s cfa=%s" % (filename, describe_CFI_CFA_rule(line['cfa'])))
         if 'cfa' not in ref_line:
             ref_line['cfa'] = line['cfa']
             ref_filenames['cfa'] = filename
