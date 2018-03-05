@@ -30,5 +30,5 @@ export CREDUCE_FILE="$basename-creduce.c"
 cp "$source_file" "$CREDUCE_FILE"
 
 "$bin_dir/dwarf-orc-creduce-test.sh"
-$CREDUCE "$bin_dir/dwarf-orc-creduce-test.sh" "$CREDUCE_FILE"
+$CREDUCE --tidy $CREDUCEFLAGS "$bin_dir/dwarf-orc-creduce-test.sh" "$CREDUCE_FILE"
 "$bin_dir/dwarf-orc-creduce-test.sh"
