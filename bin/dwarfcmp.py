@@ -13,22 +13,17 @@ from elftools.dwarf.callframe import FDE, CFARule, RegisterRule
 parser = argparse.ArgumentParser()
 parser.add_argument('--strict', help='enable strict mode', action='store_true')
 parser.add_argument('--verbose', help='enable verbose mode', action='store_true')
+parser.add_argument('--cfa', help='compare CFA when not used by register rules', action='store_true')
 parser.add_argument('files', nargs='+')
 
 args = parser.parse_args()
 strict = args.strict
 verbose = args.verbose
+check_cfa = args.cfa
 filenames = args.files
 
 def compare_CFI_CFA_rule(a, b):
-    if a.expr or b.expr:
-        if not (a.expr and b.expr):
-            return False
-        if not strict:
-            print("Warning: ignored CFA expression")
-        return not strict # TODO
-    else:
-        return a.reg == b.reg and a.offset == b.offset
+    return a.reg == b.reg and a.offset == b.offset and a.expr == b.expr
 
 def compare_CFI_register_rule(a, b):
     if not strict and (a.type == 'UNDEFINED' or b.type == 'UNDEFINED'):
@@ -102,28 +97,24 @@ for pc in pcs:
         if line is None:
             continue
 
+        cfa_ok = True
         if verbose:
             print("%s cfa=%s" % (filename, describe_CFI_CFA_rule(line['cfa'])))
         if 'cfa' not in ref_line:
             ref_line['cfa'] = line['cfa']
             ref_filenames['cfa'] = filename
         else:
-            if not compare_CFI_CFA_rule(ref_line['cfa'], line['cfa']):
-                print("CFA rule mismatch at pc=0x%x: %s (in %s) vs %s (in %s)" % (
-                    pc,
-                    describe_CFI_CFA_rule(ref_line['cfa']),
-                    ref_filenames['cfa'],
-                    describe_CFI_CFA_rule(line['cfa']),
-                    filename,
-                ))
-                mismatched = True
+            cfa_ok = compare_CFI_CFA_rule(ref_line['cfa'], line['cfa'])
 
+        needs_cfa = False
         for reg_num in line['reg_order']:
             reg_rule = line.get(reg_num, RegisterRule(RegisterRule.UNDEFINED))
             if reg_num not in ref_line:
                 ref_line[reg_num] = reg_rule
                 ref_filenames[reg_num] = filename
             else:
+                # TODO: more precise criteria
+                needs_cfa = reg_rule.type != RegisterRule.UNDEFINED
                 if not compare_CFI_register_rule(ref_line[reg_num], reg_rule):
                     print("Register rule mismatch at pc=0x%x: %s (in %s) vs %s (in %s)" % (
                         pc,
@@ -133,6 +124,16 @@ for pc in pcs:
                         filename,
                     ))
                     mismatched = True
+
+        if not cfa_ok and (check_cfa or needs_cfa):
+            print("CFA rule mismatch at pc=0x%x: %s (in %s) vs %s (in %s)" % (
+                pc,
+                describe_CFI_CFA_rule(ref_line['cfa']),
+                ref_filenames['cfa'],
+                describe_CFI_CFA_rule(line['cfa']),
+                filename,
+            ))
+            mismatched = True
 
 if mismatched:
     exit(1)
