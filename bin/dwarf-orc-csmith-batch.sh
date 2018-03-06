@@ -6,7 +6,7 @@ optimization_flags="-O0 -O1 -O2 -O3"
 frame_pointer_flags="-fomit-frame-pointer -fno-omit-frame-pointer"
 
 i=0
-while true; do
+while [ "$i" -lt 100 ]; do
 	optimization_flag=$(shuf -e -n1 -- $optimization_flags)
 	frame_pointer_flag=$(shuf -e -n1 -- $frame_pointer_flags)
 	cflags="$optimization_flag $frame_pointer_flag"
@@ -16,11 +16,8 @@ while true; do
 		objtoolflags="--no-fp"
 	fi
 
-	export CFLAGS="$CFLAGS $cflags"
-	export OBJTOOLFLAGS="$OBJTOOLFLAGS $objtoolflags"
-
 	# TODO: pass random options to csmith
-	"$bin_dir/dwarf-orc-csmith.sh"
+	env CFLAGS="$CFLAGS $cflags" OBJTOOLFLAGS="$OBJTOOLFLAGS $objtoolflags" "$bin_dir/dwarf-orc-csmith.sh"
 	if [ "$?" -ne 0 ]; then
 		source_file="csmith-$i.c"
 		env_file="csmith-$i.env"
