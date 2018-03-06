@@ -19,8 +19,9 @@ while [ "$i" -lt 100 ]; do
 	# TODO: pass random options to csmith
 	env CFLAGS="$CFLAGS $cflags" OBJTOOLFLAGS="$OBJTOOLFLAGS $objtoolflags" "$bin_dir/dwarf-orc-csmith.sh"
 	if [ "$?" -ne 0 ]; then
-		source_file="csmith-$i.c"
-		env_file="csmith-$i.env"
+		slug=$(sha1sum "csmith.c" | cut -d ' ' -f 1)
+		source_file="csmith-$slug.c"
+		env_file="csmith-$slug.env"
 
 		cp "csmith.c" "$source_file"
 
